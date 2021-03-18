@@ -31,9 +31,9 @@ COPY --from=generate-build /src/api /api
 FROM k8s.gcr.io/hyperkube:v1.17.0 AS release-build
 RUN apt update -y \
   && apt install -y curl \
-  && curl -LO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.5.4/kustomize_v3.5.4_linux_amd64.tar.gz \
-  && tar -xf kustomize_v3.5.4_linux_amd64.tar.gz -C /usr/local/bin \
-  && rm kustomize_v3.5.4_linux_amd64.tar.gz
+  && curl -LO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.0.5/kustomize_v4.0.5_linux_arm64.tar.gz \
+  && tar -xf kustomize_v4.0.5_linux_arm64.tar.gz -C /usr/local/bin \
+  && rm kustomize_v4.0.5_linux_arm64.tar.gz
 COPY ./config ./config
 ARG REGISTRY_AND_USERNAME
 ARG NAME
@@ -49,7 +49,7 @@ COPY --from=release-build /control-plane-components.yaml /control-plane-componen
 COPY --from=release-build /metadata.yaml /metadata.yaml
 
 FROM build AS binary
-RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux go build -ldflags "-s -w" -o /manager
+RUN --mount=type=cache,target=/root/.cache/go-build GOARCH=arm64 GOOS=linux go build -ldflags "-s -w" -o /manager
 RUN chmod +x /manager
 
 FROM scratch AS container
